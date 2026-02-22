@@ -147,7 +147,7 @@ export function AIChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionsLoading, setSessionsLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Keep ref in sync so callbacks always see the latest value
@@ -197,10 +197,12 @@ export function AIChat() {
   const startNewChat = () => {
     setActiveId(null);
     setInput("");
+    setSidebarOpen(false);
   };
 
   const switchToSession = (id: string) => {
     setActiveId(id);
+    setSidebarOpen(false);
   };
 
   const deleteSession = async (id: string) => {
@@ -359,11 +361,20 @@ export function AIChat() {
 
   return (
     <div className="flex h-[calc(100vh-10rem)] gap-0 rounded-lg border overflow-hidden bg-background">
-      {/* Sidebar */}
+      {/* Sidebar backdrop - mobile only */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 sm:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      {/* Sidebar - slide-over on mobile, inline on desktop */}
       <div
-        className={`${
-          sidebarOpen ? "w-72" : "w-0"
-        } transition-all duration-200 border-r flex flex-col bg-muted/30 overflow-hidden shrink-0`}
+        className={`
+          fixed sm:relative inset-y-0 left-0 z-50 sm:z-auto
+          ${sidebarOpen ? "w-72" : "w-0 sm:w-0"}
+          transition-all duration-200 border-r flex flex-col bg-background overflow-hidden shrink-0
+        `}
       >
         <div className="h-[49px] px-3 border-b flex items-center justify-between gap-2">
           <h3 className="font-semibold text-sm truncate">Chat History</h3>
@@ -452,14 +463,14 @@ export function AIChat() {
 
         {/* Messages or welcome screen */}
         {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-6">
-            <Bot className="h-16 w-16 text-primary mb-4" />
-            <h2 className="text-2xl font-bold mb-2">AI Chef Assistant</h2>
-            <p className="text-muted-foreground text-center mb-8 max-w-md">
+          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
+            <Bot className="h-12 w-12 sm:h-16 sm:w-16 text-primary mb-3 sm:mb-4" />
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">AI Chef Assistant</h2>
+            <p className="text-muted-foreground text-center mb-6 sm:mb-8 max-w-md text-sm sm:text-base">
               Ask me to generate recipes, suggest meals from your ingredients, estimate nutrition, plan meals, or
               improve your recipes.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-2xl">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 w-full max-w-2xl">
               {quickActions.map((action) => (
                 <Button
                   key={action.label}
@@ -474,7 +485,7 @@ export function AIChat() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
             {messages.map((msg, i) => (
               <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.role === "assistant" && (
@@ -483,7 +494,7 @@ export function AIChat() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                  className={`max-w-[88%] sm:max-w-[80%] rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 ${
                     msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                   }`}
                 >
@@ -545,12 +556,12 @@ export function AIChat() {
         )}
 
         {/* Input area */}
-        <div className="border-t p-4">
+        <div className="border-t p-3 sm:p-4">
           <div className="flex gap-2">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask the AI Chef anything about cooking..."
+              placeholder="Ask the AI Chef..."
               className="min-h-[44px] max-h-32 resize-none"
               rows={1}
               onKeyDown={(e) => {

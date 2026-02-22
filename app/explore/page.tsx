@@ -77,7 +77,7 @@ export default function ExplorePage() {
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Compass className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Explore Recipes</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Explore Recipes</h1>
         </div>
         <p className="text-muted-foreground">
           Discover delicious recipes shared by the community

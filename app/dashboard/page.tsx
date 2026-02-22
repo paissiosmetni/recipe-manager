@@ -128,7 +128,7 @@ export default function DashboardPage() {
   return (
     <div className="container py-6 space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <BookOpen className="h-8 w-8 text-primary" />
@@ -204,7 +204,7 @@ export default function DashboardPage() {
           </Button>
           <Link href="/recipes/new">
             <Button className="gap-1">
-              <Plus className="h-4 w-4" /> New Recipe
+              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">New Recipe</span>
             </Button>
           </Link>
         </div>

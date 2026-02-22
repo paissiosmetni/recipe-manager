@@ -212,7 +212,7 @@ export function RecipeForm({ initialData, mode }: RecipeFormProps) {
               rows={3}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <Label htmlFor="cuisine">Cuisine</Label>
               <Select
@@ -239,7 +239,7 @@ export function RecipeForm({ initialData, mode }: RecipeFormProps) {
               </Select>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <div>
               <Label htmlFor="prep_time">Prep Time (min)</Label>
               <Input
@@ -312,12 +312,12 @@ export function RecipeForm({ initialData, mode }: RecipeFormProps) {
         <CardContent className="space-y-2">
           {form.ingredients.map((ingredient, index) => (
             <div key={index} className="flex items-center gap-2">
-              <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+              <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 hidden sm:block" />
               <Input
-                placeholder="Amount (e.g., 1 cup)"
+                placeholder="Amount"
                 value={ingredient.amount}
                 onChange={(e) => updateIngredient(index, "amount", e.target.value)}
-                className="w-1/3"
+                className="w-24 sm:w-1/3"
               />
               <Input
                 placeholder="Ingredient"
@@ -416,7 +416,7 @@ export function RecipeForm({ initialData, mode }: RecipeFormProps) {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 justify-end">
+      <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end">
         <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancel
         </Button>

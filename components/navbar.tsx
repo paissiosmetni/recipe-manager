@@ -127,61 +127,65 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu - fullscreen overlay */}
       {menuOpen && (
-        <div className="md:hidden border-t bg-background p-4 space-y-2">
-          {navLinks.map((link) => {
-            const isActive = pathname.startsWith(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className={`flex items-center gap-2 p-2 rounded-md hover:bg-accent ${isActive ? "bg-accent text-accent-foreground font-medium" : ""}`}
-              >
-                <link.icon className="h-4 w-4" />
-                {link.label}
-              </Link>
-            );
-          })}
-          {user ? (
-            <>
-              <Link
-                href="/recipes/new"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 p-2 rounded-md hover:bg-accent text-primary font-medium"
-              >
-                + New Recipe
-              </Link>
-              <button
-                onClick={() => {
-                  handleSignOut();
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2 p-2 rounded-md hover:bg-accent w-full text-left text-red-500"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 p-2 rounded-md hover:bg-accent"
-              >
-                Log in
-              </Link>
-              <Link
-                href="/signup"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 p-2 rounded-md bg-primary text-primary-foreground justify-center"
-              >
-                Sign up
-              </Link>
-            </>
-          )}
+        <div className="md:hidden absolute left-0 right-0 top-16 h-[calc(100vh-4rem)] z-50 bg-background flex flex-col p-6 space-y-1 overflow-y-auto">
+          <div className="flex-1 space-y-1">
+            {navLinks.map((link) => {
+              const isActive = pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-lg hover:bg-accent transition-colors ${isActive ? "bg-accent text-accent-foreground font-medium" : ""}`}
+                >
+                  <link.icon className="h-5 w-5" />
+                  {link.label}
+                </Link>
+              );
+            })}
+            {user ? (
+              <>
+                <Link
+                  href="/recipes/new"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-lg hover:bg-accent text-primary font-medium transition-colors"
+                >
+                  + New Recipe
+                </Link>
+                <div className="pt-4 mt-4 border-t">
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-lg hover:bg-accent w-full text-left text-red-500 transition-colors"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Sign out
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="pt-4 mt-4 border-t space-y-2">
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center px-4 py-3 rounded-lg text-lg hover:bg-accent transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center px-4 py-3 rounded-lg text-lg bg-primary text-primary-foreground transition-colors"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </nav>

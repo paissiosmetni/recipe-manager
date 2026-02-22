@@ -236,7 +236,7 @@ export default function RecipeDetailPage() {
 
         {/* Title + Meta */}
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold">{recipe.title}</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">{recipe.title}</h1>
           {recipe.description && (
             <p className="mt-2 text-muted-foreground text-lg">{recipe.description}</p>
           )}
@@ -272,7 +272,7 @@ export default function RecipeDetailPage() {
           )}
 
           {/* Time/Servings info */}
-          <div className="flex flex-wrap gap-6 mt-4 text-sm">
+          <div className="flex flex-wrap gap-3 sm:gap-6 mt-4 text-sm">
             {recipe.prep_time && (
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4 text-muted-foreground" />
@@ -302,7 +302,7 @@ export default function RecipeDetailPage() {
 
         {/* Scaling */}
         <Card className="no-print">
-          <CardContent className="py-4 flex items-center gap-4">
+          <CardContent className="py-4 flex flex-wrap items-center gap-3 sm:gap-4">
             <span className="text-sm font-medium">Scale recipe:</span>
             <div className="flex items-center gap-2">
               <Button
@@ -333,7 +333,7 @@ export default function RecipeDetailPage() {
           </CardContent>
         </Card>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
           {/* Ingredients */}
           <Card className="md:col-span-1">
             <CardHeader>
@@ -400,11 +400,11 @@ export default function RecipeDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <div className="text-4xl font-mono font-bold">
                 {String(timerMinutes).padStart(2, "0")}:{String(timerSeconds).padStart(2, "0")}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {!timerRunning && timerTotal === 0 && (
                   <>
                     {recipe.prep_time && (

@@ -104,7 +104,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container py-6 max-w-2xl space-y-6">
-      <h1 className="text-3xl font-bold">Your Profile</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold">Your Profile</h1>
 
       <Card>
         <CardHeader>

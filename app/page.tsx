@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
-  ChefHat,
   Sparkles,
   Globe,
   BookOpen,
@@ -102,33 +101,33 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20" />
-        <div className="container relative py-24 md:py-32 flex flex-col items-center text-center">
+        <div className="container relative py-16 md:py-32 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-6">
             <Sparkles className="h-4 w-4" />
             Powered by AI
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-3xl">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight max-w-3xl">
             Your Smart
             <span className="text-primary"> Recipe </span>
             Companion
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground max-w-2xl">
+          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground max-w-2xl">
             RecipeAI combines intelligent recipe management with a conversational AI Chef
             that generates recipes, plans meals, and helps you cook smarter — all in one place.
           </p>
-          <div className="mt-8 flex gap-4">
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
             <Link href="/signup">
-              <Button size="lg" className="gap-2">
+              <Button size="lg" className="gap-2 w-full sm:w-auto">
                 Get Started <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/explore">
-              <Button size="lg" variant="outline" className="gap-2">
+              <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
                 <Globe className="h-4 w-4" /> Explore Recipes
               </Button>
             </Link>
           </div>
-          <div className="mt-12 flex items-center gap-8 text-sm text-muted-foreground">
+          <div className="mt-8 sm:mt-12 flex flex-wrap justify-center gap-4 sm:gap-8 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Bot className="h-4 w-4" /> AI Chef Assistant
             </span>
@@ -144,19 +143,19 @@ export default function LandingPage() {
 
       {/* AI Showcase */}
       <section className="border-t bg-muted/30">
-        <div className="container py-20">
-          <div className="text-center mb-12">
+        <div className="container py-12 sm:py-20">
+          <div className="text-center mb-8 sm:mb-12">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
               <Bot className="h-4 w-4" /> AI-Powered
             </div>
-            <h2 className="text-3xl font-bold">Meet Your AI Chef</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold">Meet Your AI Chef</h2>
             <p className="mt-2 text-muted-foreground max-w-xl mx-auto">
               A conversational AI assistant that understands cooking. Ask anything and get instant, actionable results.
             </p>
           </div>
 
           {/* Chat mockup + capabilities side by side */}
-          <div className="grid lg:grid-cols-2 gap-8 items-start">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-8 items-start">
             {/* Chat mockup */}
             <div className="rounded-xl border bg-background shadow-sm overflow-hidden">
               <div className="px-4 py-3 border-b bg-muted/50 flex items-center gap-2">
@@ -240,14 +239,14 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section className="container py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold">How It Works</h2>
+      <section className="container py-12 sm:py-20">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold">How It Works</h2>
           <p className="mt-2 text-muted-foreground">
             From idea to plate in three simple steps
           </p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
           {steps.map((step) => (
             <div key={step.number} className="text-center">
               <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
@@ -262,18 +261,18 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="border-t bg-muted/30">
-        <div className="container py-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold">Everything You Need</h2>
+        <div className="container py-12 sm:py-20">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold">Everything You Need</h2>
             <p className="mt-2 text-muted-foreground">
               A complete toolkit for the modern home chef
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="rounded-lg border bg-card p-6 hover:shadow-md transition-shadow"
+                className="rounded-lg border bg-card p-4 sm:p-6 hover:shadow-md transition-shadow"
               >
                 <feature.icon className="h-10 w-10 text-primary mb-4" />
                 <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
@@ -319,7 +318,7 @@ export default function LandingPage() {
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             Join RecipeAI and experience how AI transforms recipe management, meal planning, and cooking.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/signup">
               <Button size="lg" className="gap-2">
                 Create Free Account <ArrowRight className="h-4 w-4" />
@@ -334,16 +333,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <ChefHat className="h-4 w-4 text-primary" />
-            <span>RecipeAI</span>
-          </div>
-          <p>&copy; {new Date().getFullYear()} RecipeAI. Built with Next.js, Supabase & AI.</p>
-        </div>
-      </footer>
     </div>
   );
 }

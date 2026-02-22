@@ -89,7 +89,7 @@ export function RecipeCard({ recipe, onStatusChange, showOwner, ownerName, owner
       <Link href={`/recipes/${recipe.id}`} className="block">
         <Card className="hover:shadow-md transition-shadow group overflow-hidden">
           <div className="flex">
-            <div className="w-40 sm:w-48 shrink-0 overflow-hidden">
+            <div className="w-32 sm:w-40 md:w-48 shrink-0 overflow-hidden">
               {recipe.image_url ? (
                 <img
                   src={recipe.image_url}
