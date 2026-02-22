@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/theme-provider";
@@ -25,6 +25,7 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
 
   useEffect(() => {
@@ -64,14 +65,17 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href}>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <link.icon className="h-4 w-4" />
-                {link.label}
-              </Button>
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = pathname.startsWith(link.href);
+            return (
+              <Link key={link.href} href={link.href}>
+                <Button variant="ghost" size="sm" className={`gap-2 ${isActive ? "bg-accent text-accent-foreground" : ""}`}>
+                  <link.icon className="h-4 w-4" />
+                  {link.label}
+                </Button>
+              </Link>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-2">
@@ -126,17 +130,20 @@ export function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t bg-background p-4 space-y-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2 p-2 rounded-md hover:bg-accent"
-            >
-              <link.icon className="h-4 w-4" />
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = pathname.startsWith(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center gap-2 p-2 rounded-md hover:bg-accent ${isActive ? "bg-accent text-accent-foreground font-medium" : ""}`}
+              >
+                <link.icon className="h-4 w-4" />
+                {link.label}
+              </Link>
+            );
+          })}
           {user ? (
             <>
               <Link

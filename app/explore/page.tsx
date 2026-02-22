@@ -108,6 +108,7 @@ export default function ExplorePage() {
               recipe={recipe}
               showOwner
               ownerName={recipe.profiles?.display_name || recipe.profiles?.username || "Unknown"}
+              ownerUsername={recipe.profiles?.username}
             />
           ))}
         </div>

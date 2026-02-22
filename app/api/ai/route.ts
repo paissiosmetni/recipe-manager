@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getGeminiModel, getSystemPrompt, type AIAction } from "@/lib/gemini";
+import { createClient } from "@/lib/supabase/server";
+import { sendAIMessage, getSystemPrompt, type AIAction } from "@/lib/ai";
 
 function detectAction(message: string): AIAction {
   const lower = message.toLowerCase();
@@ -60,45 +61,29 @@ function tryExtractRecipeArray(text: string): Record<string, unknown>[] | null {
 
 export async function POST(request: Request) {
   try {
+    // Auth check — prevent unauthenticated access to the AI endpoint
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { message, history } = await request.json();
 
     if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json(
-        { error: "AI service not configured" },
-        { status: 500 }
-      );
-    }
-
     const action = detectAction(message);
     const systemPrompt = getSystemPrompt(action);
 
-    // Build chat history for context
+    // Build chat history
     const chatHistory = (history || []).map((msg: { role: string; content: string }) => ({
-      role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.content }],
+      role: msg.role === "user" ? "user" as const : "assistant" as const,
+      content: msg.content,
     }));
 
-    const model = getGeminiModel();
-    const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: `System instructions: ${systemPrompt}` }],
-        },
-        {
-          role: "model",
-          parts: [{ text: "Understood. I'll follow these instructions." }],
-        },
-        ...chatHistory,
-      ],
-    });
-
-    const result = await chat.sendMessage(message);
-    const responseText = result.response.text();
+    const responseText = await sendAIMessage(systemPrompt, chatHistory, message);
 
     let recipe = null;
     let recipes: Record<string, unknown>[] | null = null;
@@ -220,6 +205,17 @@ export async function POST(request: Request) {
       const extracted = tryExtractRecipe(responseText);
       if (extracted) {
         recipe = extracted;
+        // Format the extracted recipe as readable text
+        displayText = `Here's your recipe for **${recipe.title}**!\n\n`;
+        if (recipe.description) displayText += `${recipe.description}\n\n`;
+        displayText += `**Cuisine:** ${recipe.cuisine || "General"} | **Difficulty:** ${recipe.difficulty || "easy"}\n`;
+        displayText += `**Prep:** ${recipe.prep_time || 0}min | **Cook:** ${recipe.cook_time || 0}min | **Servings:** ${recipe.servings || 4}\n\n`;
+        if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+          displayText += `**Ingredients:**\n${(recipe.ingredients as { amount: string; item: string }[]).map((i) => `- ${i.amount} ${i.item}`).join("\n")}\n\n`;
+        }
+        if (recipe.instructions && Array.isArray(recipe.instructions)) {
+          displayText += `**Instructions:**\n${(recipe.instructions as string[]).map((s, i) => `${i + 1}. ${s}`).join("\n")}`;
+        }
       }
     }
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -167,11 +168,14 @@ export default function ProfilePage() {
             </label>
           </div>
           {profile.is_public && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-md">
+            <Link
+              href={`/shared/${profile.username}`}
+              className="flex items-center gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-md hover:bg-muted/80 transition-colors"
+            >
               <LinkIcon className="h-4 w-4" />
               <span>Your public profile: </span>
-              <code className="text-primary">/shared/{profile.username}</code>
-            </div>
+              <code className="text-primary hover:underline">/shared/{profile.username}</code>
+            </Link>
           )}
           <div className="flex justify-end">
             <Button onClick={handleSave} disabled={saving}>

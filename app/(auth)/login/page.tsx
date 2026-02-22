@@ -20,7 +20,9 @@ function LoginForm() {
   const { toast } = useToast();
   const supabase = createClient();
 
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  // Sanitize redirect to prevent open redirect attacks
+  const rawRedirect = searchParams.get("redirect") || "/dashboard";
+  const redirect = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/dashboard";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

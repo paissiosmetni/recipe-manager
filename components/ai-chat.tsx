@@ -365,7 +365,7 @@ export function AIChat() {
           sidebarOpen ? "w-72" : "w-0"
         } transition-all duration-200 border-r flex flex-col bg-muted/30 overflow-hidden shrink-0`}
       >
-        <div className="p-3 border-b flex items-center justify-between gap-2">
+        <div className="h-[49px] px-3 border-b flex items-center justify-between gap-2">
           <h3 className="font-semibold text-sm truncate">Chat History</h3>
           <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={startNewChat} title="New chat">
             <Plus className="h-4 w-4" />
@@ -428,7 +428,7 @@ export function AIChat() {
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Chat header */}
-        <div className="px-3 py-2 border-b flex items-center gap-2">
+        <div className="h-[49px] px-3 border-b flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"

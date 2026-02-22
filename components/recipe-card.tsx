@@ -40,6 +40,8 @@ interface RecipeCardProps {
   onStatusChange?: () => void;
   showOwner?: boolean;
   ownerName?: string;
+  ownerUsername?: string;
+  variant?: "grid" | "list";
 }
 
 const statusConfig = {
@@ -54,7 +56,7 @@ const difficultyColors: Record<string, string> = {
   hard: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
 };
 
-export function RecipeCard({ recipe, onStatusChange, showOwner, ownerName }: RecipeCardProps) {
+export function RecipeCard({ recipe, onStatusChange, showOwner, ownerName, ownerUsername, variant = "grid" }: RecipeCardProps) {
   const { toast } = useToast();
   const supabase = createClient();
 
@@ -82,18 +84,112 @@ export function RecipeCard({ recipe, onStatusChange, showOwner, ownerName }: Rec
   const statusColor = statusConfig[recipe.status as keyof typeof statusConfig]?.color || "";
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
 
+  if (variant === "list") {
+    return (
+      <Link href={`/recipes/${recipe.id}`} className="block">
+        <Card className="hover:shadow-md transition-shadow group overflow-hidden">
+          <div className="flex">
+            <div className="w-40 sm:w-48 shrink-0 overflow-hidden">
+              {recipe.image_url ? (
+                <img
+                  src={recipe.image_url}
+                  alt={recipe.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-full min-h-28 bg-muted flex items-center justify-center">
+                  <ChefHat className="h-8 w-8 text-muted-foreground/40" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0 p-4 flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-semibold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
+                    {recipe.title}
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 h-8 w-8"
+                    onClick={cycleStatus}
+                    title={`Status: ${statusConfig[recipe.status as keyof typeof statusConfig]?.label}`}
+                  >
+                    <StatusIcon className={`h-4 w-4 ${statusColor}`} />
+                  </Button>
+                </div>
+                {recipe.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
+                    {recipe.description}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex flex-wrap gap-1.5">
+                  {recipe.cuisine && (
+                    <Badge variant="secondary" className="text-xs">{recipe.cuisine}</Badge>
+                  )}
+                  {recipe.difficulty && (
+                    <Badge className={`text-xs border-0 ${difficultyColors[recipe.difficulty] || ""}`}>{recipe.difficulty}</Badge>
+                  )}
+                  {recipe.ai_generated && (
+                    <Badge variant="outline" className="text-xs gap-1"><Sparkles className="h-3 w-3" /> AI</Badge>
+                  )}
+                  {recipe.is_public && (
+                    <Badge variant="outline" className="text-xs gap-1"><Globe className="h-3 w-3" /> Public</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0 ml-3">
+                  {totalTime > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />{formatTime(totalTime)}
+                    </span>
+                  )}
+                  {recipe.servings && (
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />{recipe.servings}
+                    </span>
+                  )}
+                  {showOwner && ownerName && (
+                    ownerUsername ? (
+                      <Link
+                        href={`/shared/${ownerUsername}`}
+                        className="flex items-center gap-1 hover:text-primary transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ChefHat className="h-3 w-3" />{ownerName}
+                      </Link>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <ChefHat className="h-3 w-3" />{ownerName}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </Link>
+    );
+  }
+
   return (
     <Link href={`/recipes/${recipe.id}`}>
       <Card className="h-full hover:shadow-md transition-shadow group overflow-hidden">
-        {recipe.image_url && (
-          <div className="aspect-video overflow-hidden">
+        <div className="aspect-video overflow-hidden">
+          {recipe.image_url ? (
             <img
               src={recipe.image_url}
               alt={recipe.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
-          </div>
-        )}
+          ) : (
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <ChefHat className="h-12 w-12 text-muted-foreground/40" />
+            </div>
+          )}
+        </div>
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-lg leading-tight line-clamp-2 group-hover:text-primary transition-colors">
@@ -153,10 +249,21 @@ export function RecipeCard({ recipe, onStatusChange, showOwner, ownerName }: Rec
             </span>
           )}
           {showOwner && ownerName && (
-            <span className="flex items-center gap-1 ml-auto">
-              <ChefHat className="h-3 w-3" />
-              {ownerName}
-            </span>
+            ownerUsername ? (
+              <Link
+                href={`/shared/${ownerUsername}`}
+                className="flex items-center gap-1 ml-auto hover:text-primary transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ChefHat className="h-3 w-3" />
+                {ownerName}
+              </Link>
+            ) : (
+              <span className="flex items-center gap-1 ml-auto">
+                <ChefHat className="h-3 w-3" />
+                {ownerName}
+              </span>
+            )
           )}
         </CardFooter>
       </Card>

@@ -298,12 +298,13 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {filteredRecipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
               onStatusChange={fetchRecipes}
+              variant="list"
             />
           ))}
         </div>

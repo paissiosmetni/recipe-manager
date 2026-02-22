@@ -35,12 +35,25 @@ export default function SignupPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const sanitizedUsername = username.toLowerCase().replace(/[^a-z0-9_]/g, "");
+
+    // Check username availability before signup
+    const { data: available } = await supabase.rpc("is_username_available", {
+      requested_username: sanitizedUsername,
+    });
+
+    if (!available) {
+      toast("Username is already taken", "error");
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          username: username.toLowerCase().replace(/[^a-z0-9_]/g, ""),
+          username: sanitizedUsername,
           full_name: fullName,
         },
       },
@@ -48,8 +61,20 @@ export default function SignupPage() {
 
     if (error) {
       toast(error.message, "error");
+    } else if (!data.session) {
+      toast("Signup failed. Please try again.", "error");
     } else {
-      toast("Account created! Check your email to verify.", "success");
+      // Create profile from the app (more reliable than the DB trigger)
+      await supabase.from("profiles").upsert(
+        {
+          id: data.user!.id,
+          username: sanitizedUsername,
+          display_name: fullName,
+        },
+        { onConflict: "id" }
+      );
+
+      toast("Account created! Welcome to RecipeAI.", "success");
       router.push("/dashboard");
       router.refresh();
     }
@@ -67,49 +92,59 @@ export default function SignupPage() {
           <CardDescription>Join RecipeAI and start cooking smarter</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4" autoComplete="off">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="signup-fullname">Full Name</Label>
               <Input
-                id="fullName"
+                id="signup-fullname"
+                name="signup-fullname"
                 placeholder="Your name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
+                autoComplete="name"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="signup-email">Email</Label>
               <Input
-                id="username"
-                placeholder="chef_username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                minLength={3}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
+                id="signup-email"
+                name="signup-email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="signup-handle">Username</Label>
               <Input
-                id="password"
+                id="signup-handle"
+                name="signup-handle"
+                placeholder="chef_username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                minLength={3}
+                autoComplete="off"
+                data-lpignore="true"
+                data-1p-ignore="true"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="signup-password">Password</Label>
+              <Input
+                id="signup-password"
+                name="signup-password"
                 type="password"
                 placeholder="At least 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
+                autoComplete="new-password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

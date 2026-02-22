@@ -78,10 +78,27 @@ create or replace function handle_new_user()
 returns trigger as $$
 begin
   insert into profiles (id, username, display_name)
-  values (new.id, new.raw_user_meta_data->>'username', new.raw_user_meta_data->>'full_name');
+  values (new.id, new.raw_user_meta_data->>'username', new.raw_user_meta_data->>'full_name')
+  on conflict (id) do update set
+    display_name = excluded.display_name;
   return new;
+exception
+  when unique_violation then
+    insert into profiles (id, username, display_name)
+    values (new.id, new.raw_user_meta_data->>'username' || '_' || left(new.id::text, 4), new.raw_user_meta_data->>'full_name')
+    on conflict (id) do update set
+      display_name = excluded.display_name;
+    return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql security definer;
 
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function handle_new_user();
+
+-- Check username availability (bypasses RLS for unauthenticated signup)
+create or replace function is_username_available(requested_username text)
+returns boolean as $$
+begin
+  return not exists (select 1 from profiles where username = requested_username);
+end;
+$$ language plpgsql security definer;

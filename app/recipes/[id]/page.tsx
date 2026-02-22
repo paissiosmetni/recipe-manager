@@ -74,6 +74,7 @@ export default function RecipeDetailPage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
+  const [ownerProfile, setOwnerProfile] = useState<{ username: string; display_name: string | null } | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [scaleFactor, setScaleFactor] = useState(1);
 
@@ -86,7 +87,7 @@ export default function RecipeDetailPage() {
   const fetchRecipe = useCallback(async () => {
     const { data, error } = await supabase
       .from("recipes")
-      .select("*")
+      .select("*, profiles(username, display_name)")
       .eq("id", params.id)
       .single();
 
@@ -96,10 +97,12 @@ export default function RecipeDetailPage() {
       return;
     }
 
-    setRecipe(data);
+    const { profiles, ...recipeData } = data as any;
+    setRecipe(recipeData);
+    setOwnerProfile(profiles || null);
 
     const { data: { user } } = await supabase.auth.getUser();
-    setIsOwner(user?.id === data.user_id);
+    setIsOwner(user?.id === recipeData.user_id);
     setLoading(false);
   }, [params.id]);
 
@@ -217,15 +220,19 @@ export default function RecipeDetailPage() {
         </div>
 
         {/* Image */}
-        {recipe.image_url && (
-          <div className="aspect-video rounded-lg overflow-hidden">
+        <div className="aspect-video rounded-lg overflow-hidden">
+          {recipe.image_url ? (
             <img
               src={recipe.image_url}
               alt={recipe.title}
               className="w-full h-full object-cover"
             />
-          </div>
-        )}
+          ) : (
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <ChefHat className="h-16 w-16 text-muted-foreground/40" />
+            </div>
+          )}
+        </div>
 
         {/* Title + Meta */}
         <div>
@@ -250,6 +257,19 @@ export default function RecipeDetailPage() {
               <Badge key={tag} variant="secondary">{tag}</Badge>
             ))}
           </div>
+
+          {/* Owner */}
+          {!isOwner && ownerProfile && (
+            <div className="mt-4">
+              <Link
+                href={`/shared/${ownerProfile.username}`}
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                <ChefHat className="h-4 w-4" />
+                By {ownerProfile.display_name || ownerProfile.username}
+              </Link>
+            </div>
+          )}
 
           {/* Time/Servings info */}
           <div className="flex flex-wrap gap-6 mt-4 text-sm">

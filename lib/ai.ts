@@ -1,18 +1,111 @@
 import { GoogleGenerativeAI, type GenerativeModel } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
-let _model: GenerativeModel | null = null;
+// --- Provider config ---
 
-export function getGeminiModel(): GenerativeModel {
-  if (!_model) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable is not set");
-    }
-    const genAI = new GoogleGenerativeAI(apiKey);
-    _model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
-  }
-  return _model;
+type AIProvider = "gemini" | "groq";
+
+function getProvider(): AIProvider {
+  const provider = (process.env.AI_PROVIDER || "groq").toLowerCase();
+  if (provider === "gemini" || provider === "groq") return provider;
+  return "groq";
 }
+
+// --- Gemini setup ---
+
+let _geminiModel: GenerativeModel | null = null;
+
+function getGeminiModel(): GenerativeModel {
+  if (!_geminiModel) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
+    const genAI = new GoogleGenerativeAI(apiKey);
+    _geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+  }
+  return _geminiModel;
+}
+
+// --- Groq setup ---
+
+let _groqClient: Groq | null = null;
+
+function getGroqClient(): Groq {
+  if (!_groqClient) {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) throw new Error("GROQ_API_KEY is not set");
+    _groqClient = new Groq({ apiKey });
+  }
+  return _groqClient;
+}
+
+// --- Unified send function ---
+
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export async function sendAIMessage(
+  systemPrompt: string,
+  history: ChatMessage[],
+  message: string
+): Promise<string> {
+  const provider = getProvider();
+
+  if (provider === "gemini") {
+    return sendViaGemini(systemPrompt, history, message);
+  }
+  return sendViaGroq(systemPrompt, history, message);
+}
+
+async function sendViaGemini(
+  systemPrompt: string,
+  history: ChatMessage[],
+  message: string
+): Promise<string> {
+  const model = getGeminiModel();
+
+  const chatHistory = [
+    { role: "user" as const, parts: [{ text: `System instructions: ${systemPrompt}` }] },
+    { role: "model" as const, parts: [{ text: "Understood. I'll follow these instructions." }] },
+    ...history.map((msg) => ({
+      role: (msg.role === "user" ? "user" : "model") as "user" | "model",
+      parts: [{ text: msg.content }],
+    })),
+  ];
+
+  const chat = model.startChat({ history: chatHistory });
+  const result = await chat.sendMessage(message);
+  return result.response.text();
+}
+
+async function sendViaGroq(
+  systemPrompt: string,
+  history: ChatMessage[],
+  message: string
+): Promise<string> {
+  const client = getGroqClient();
+
+  const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
+    { role: "system", content: systemPrompt },
+    ...history.map((msg) => ({
+      role: msg.role as "user" | "assistant",
+      content: msg.content,
+    })),
+    { role: "user", content: message },
+  ];
+
+  const completion = await client.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages,
+    temperature: 0.7,
+    max_tokens: 4096,
+  });
+
+  return completion.choices[0]?.message?.content || "";
+}
+
+// --- Action types & system prompts (provider-agnostic) ---
 
 export type AIAction =
   | "generate_recipe"
@@ -103,8 +196,25 @@ Return ONLY valid JSON:
 }`,
     general_chat: `You are a friendly, knowledgeable chef AI assistant called "AI Chef".
 Help users with any cooking-related questions. Be conversational, helpful, and enthusiastic about food.
-If the user asks for a recipe, provide it in a well-formatted way.
-Keep responses concise but informative.`,
+Keep responses concise but informative.
+
+IMPORTANT: Whenever your response includes a recipe (full or partial), you MUST include a JSON block at the END of your response in this exact format:
+\`\`\`json
+{
+  "title": "Recipe Title",
+  "description": "Brief description",
+  "cuisine": "Cuisine type",
+  "prep_time": 15,
+  "cook_time": 30,
+  "servings": 4,
+  "difficulty": "easy|medium|hard",
+  "ingredients": [{"amount": "1 cup", "item": "flour"}],
+  "instructions": ["Step 1 text", "Step 2 text"],
+  "tags": ["tag1", "tag2"],
+  "nutritional_info": {"calories": 350, "protein": "20g", "carbs": "45g", "fat": "12g"}
+}
+\`\`\`
+This allows users to save the recipe. Always include this JSON when a recipe is mentioned, even if the user just names a dish.`,
   };
 
   return prompts[action];
